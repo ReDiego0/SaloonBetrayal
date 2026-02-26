@@ -1,0 +1,4 @@
+name: SaloonBetrayal
+version: '1.0.0'
+main: org.ReDiego0.saloonBetrayal.SaloonBetrayal
+api-version: '1.21'
