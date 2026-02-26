@@ -26,7 +26,7 @@ class Arena(
 
     init {
         require(spawnLocations.size >= maxPlayers) {
-            languageManager.getMessage("arenas.arena_not_enough_spawn_points (${spawnLocations.size}/$maxPlayers)", "arena" to id)
+            "Fatal error in arena $id: Insufficient spawn points (${spawnLocations.size}/$maxPlayers). Check your config.yml."
         }
     }
 
