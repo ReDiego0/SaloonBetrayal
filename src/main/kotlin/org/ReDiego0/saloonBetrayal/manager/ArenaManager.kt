@@ -12,6 +12,10 @@ class ArenaManager {
         arenas[arena.id] = arena
     }
 
+    fun getArenaIds(): List<String> {
+        return arenas.keys.toList()
+    }
+
     fun joinRandom(player: Player): Boolean {
         val availableArena = arenas.values
             .filter { !it.isPrivate && (it.state is GameState.Waiting || it.state is GameState.Starting) }
