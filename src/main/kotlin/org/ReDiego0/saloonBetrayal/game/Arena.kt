@@ -1,11 +1,18 @@
 package org.ReDiego0.saloonBetrayal.game
 
 import org.ReDiego0.saloonBetrayal.SaloonBetrayal
+import org.ReDiego0.saloonBetrayal.manager.LanguageManager
+import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scheduler.BukkitTask
 
-class Arena(val id: String, private val plugin: SaloonBetrayal) {
+class Arena(
+    val id: String,
+    private val plugin: SaloonBetrayal,
+    private val spawnLocations: List<Location>,
+    private val languageManager: LanguageManager
+) {
 
     val players = mutableSetOf<Player>()
     var state: GameState = GameState.Waiting
@@ -16,6 +23,12 @@ class Arena(val id: String, private val plugin: SaloonBetrayal) {
     val maxPlayers = 7
 
     private var countdownTask: BukkitTask? = null
+
+    init {
+        require(spawnLocations.size >= maxPlayers) {
+            languageManager.getMessage("arenas.arena_not_enough_spawn_points (${spawnLocations.size}/$maxPlayers)", "arena" to id)
+        }
+    }
 
     fun addPlayer(player: Player): Boolean {
         if (state !is GameState.Waiting && state !is GameState.Starting) return false
@@ -75,5 +88,22 @@ class Arena(val id: String, private val plugin: SaloonBetrayal) {
 
     private fun startGame() {
         state = GameState.RoleSelection(players.toList())
+        teleportPlayersToSeats()
+        // TODO: llamar al GameLogicManager o como se llame para repartir roles
+    }
+
+    private fun teleportPlayersToSeats() {
+        val playerList = players.toList()
+        for (i in playerList.indices) {
+            val player = playerList[i]
+            val seatLocation = spawnLocations[i]
+
+            player.teleport(seatLocation)
+
+            player.inventory.clear()
+            player.activePotionEffects.forEach { player.removePotionEffect(it.type) }
+            player.health = 20.0
+            player.foodLevel = 20
+        }
     }
 }
