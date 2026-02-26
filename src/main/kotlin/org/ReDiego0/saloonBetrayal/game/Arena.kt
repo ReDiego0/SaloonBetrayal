@@ -11,7 +11,6 @@ class Arena(
     val id: String,
     private val plugin: SaloonBetrayal,
     private val spawnLocations: List<Location>,
-    private val languageManager: LanguageManager
 ) {
 
     val players = mutableSetOf<Player>()
