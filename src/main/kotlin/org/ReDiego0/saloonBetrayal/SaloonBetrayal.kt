@@ -4,11 +4,27 @@ import org.bukkit.plugin.java.JavaPlugin
 
 class SaloonBetrayal : JavaPlugin() {
 
+    companion object {
+        lateinit var instance: SaloonBetrayal
+            private set
+    }
+
     override fun onEnable() {
-        // Plugin startup logic
+        instance = this
+        saveDefaultConfig()
+        registerCommands()
+        registerListeners()
     }
 
     override fun onDisable() {
-        // Plugin shutdown logic
+
+    }
+
+    private fun registerCommands() {
+
+    }
+
+    private fun registerListeners() {
+
     }
 }
