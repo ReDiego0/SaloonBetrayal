@@ -1,7 +1,6 @@
 package org.ReDiego0.saloonBetrayal.game
 
 import org.ReDiego0.saloonBetrayal.SaloonBetrayal
-import org.ReDiego0.saloonBetrayal.manager.LanguageManager
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitRunnable
