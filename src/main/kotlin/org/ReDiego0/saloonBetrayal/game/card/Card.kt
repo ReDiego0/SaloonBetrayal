@@ -31,33 +31,16 @@ sealed interface ActiveCard : Card {
     fun play(player: Player, target: Player? = null): Boolean
 }
 
-data object BangCard : ActiveCard {
-    override val id = "bang"
-    override val namePath = "cards.bang.name"
-    override val descriptionPath = "cards.bang.desc"
-
-    override fun play(player: Player, target: Player?): Boolean {
-        if (target == null) return false
-        return true
-    }
+enum class EquipSlotType {
+    WEAPON,
+    PASSIVE,
+    PENALTY
 }
 
-data object BeerCard : ActiveCard {
-    override val id = "beer"
-    override val namePath = "cards.beer.name"
-    override val descriptionPath = "cards.beer.desc"
-
-    override fun play(player: Player, target: Player?): Boolean {
-        return true
-    }
+sealed interface PassiveCard : Card {
+    val equipSlotType: EquipSlotType
 }
 
-data object StagecoachCard : ActiveCard {
-    override val id = "stagecoach"
-    override val namePath = "cards.stagecoach.name"
-    override val descriptionPath = "cards.stagecoach.desc"
-
-    override fun play(player: Player, target: Player?): Boolean {
-        return true
-    }
+sealed interface WeaponCard : PassiveCard {
+    val range: Int
 }

@@ -21,8 +21,27 @@ class Deck {
         }
 
         repeat(25) { drawPile.add(createGameCard(BangCard)) }
+        repeat(12) { drawPile.add(createGameCard(MissedCard)) }
         repeat(6) { drawPile.add(createGameCard(BeerCard)) }
+        repeat(4) { drawPile.add(createGameCard(PanicCard)) }
+        repeat(4) { drawPile.add(createGameCard(CatBalouCard)) }
+        repeat(3) { drawPile.add(createGameCard(DuelCard)) }
+        repeat(2) { drawPile.add(createGameCard(IndiansCard)) }
+        repeat(1) { drawPile.add(createGameCard(GatlingCard)) }
+        repeat(1) { drawPile.add(createGameCard(SaloonCard)) }
         repeat(2) { drawPile.add(createGameCard(StagecoachCard)) }
+        repeat(1) { drawPile.add(createGameCard(WellsFargoCard)) }
+        repeat(2) { drawPile.add(createGameCard(GeneralStoreCard)) }
+        repeat(2) { drawPile.add(createGameCard(BarrelCard)) }
+        repeat(3) { drawPile.add(createGameCard(JailCard)) }
+        repeat(1) { drawPile.add(createGameCard(DynamiteCard)) }
+        repeat(2) { drawPile.add(createGameCard(MustangCard)) }
+        repeat(1) { drawPile.add(createGameCard(ScopeCard)) }
+        repeat(2) { drawPile.add(createGameCard(VolcanicCard)) }
+        repeat(3) { drawPile.add(createGameCard(SchofieldCard)) }
+        repeat(1) { drawPile.add(createGameCard(RemingtonCard)) }
+        repeat(1) { drawPile.add(createGameCard(RevCarabineCard)) }
+        repeat(1) { drawPile.add(createGameCard(WinchesterCard)) }
 
         drawPile.shuffle()
     }

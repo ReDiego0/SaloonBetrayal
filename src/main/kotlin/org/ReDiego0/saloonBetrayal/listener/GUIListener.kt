@@ -3,6 +3,7 @@ package org.ReDiego0.saloonBetrayal.listener
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.ReDiego0.saloonBetrayal.SaloonBetrayal
 import org.ReDiego0.saloonBetrayal.game.card.CardMapper.getCardId
+import org.ReDiego0.saloonBetrayal.game.card.CardMapper.toGameCard
 import org.ReDiego0.saloonBetrayal.manager.ArenaManager
 import org.ReDiego0.saloonBetrayal.manager.LanguageManager
 import org.bukkit.Material
@@ -116,7 +117,8 @@ class GUIListener(
         if (event.clickedInventory != event.view.topInventory) return
 
         val clickedItem = event.currentItem ?: return
-        if (clickedItem.getCardId() == null) return
+
+        val gameCard = clickedItem.toGameCard() ?: return
 
         val arena = arenaManager.getArena(player) ?: return
         var neededToDiscard = discardTracker[player] ?: return
@@ -124,16 +126,17 @@ class GUIListener(
         clickedItem.amount -= 1
         neededToDiscard -= 1
         discardTracker[player] = neededToDiscard
+
+        arena.deck.discard(gameCard)
+
         if (neededToDiscard <= 0) {
             discardTracker.remove(player)
-
             player.inventory.clear()
             for (item in event.view.topInventory.contents) {
-                if (item != null && item.getCardId() != null) {
+                if (item != null && item.toGameCard() != null) {
                     player.inventory.addItem(item)
                 }
             }
-
             player.closeInventory()
             arena.turnManager.passTurnToNext()
         } else {
@@ -165,7 +168,7 @@ class GUIListener(
 
                 val inventoryToReopen = event.inventory
                 org.bukkit.Bukkit.getScheduler().runTaskLater(
-                    org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance,
+                    SaloonBetrayal.instance,
                     Runnable {
                         player.openInventory(inventoryToReopen)
                     },
