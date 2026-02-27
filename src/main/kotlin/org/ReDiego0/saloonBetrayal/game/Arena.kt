@@ -104,4 +104,8 @@ class Arena(
             player.foodLevel = 20
         }
     }
+
+    fun updateState(newState: GameState) {
+        this.state = newState
+    }
 }
