@@ -3,8 +3,6 @@ package org.ReDiego0.saloonBetrayal.game
 import org.ReDiego0.saloonBetrayal.SaloonBetrayal
 import org.ReDiego0.saloonBetrayal.game.character.PlayerCharacter
 import org.ReDiego0.saloonBetrayal.game.role.Role
-import org.ReDiego0.saloonBetrayal.manager.CharacterManager
-import org.ReDiego0.saloonBetrayal.manager.RoleManager
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitRunnable
