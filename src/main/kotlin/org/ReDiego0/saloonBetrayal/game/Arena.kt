@@ -1,6 +1,10 @@
 package org.ReDiego0.saloonBetrayal.game
 
 import org.ReDiego0.saloonBetrayal.SaloonBetrayal
+import org.ReDiego0.saloonBetrayal.game.character.PlayerCharacter
+import org.ReDiego0.saloonBetrayal.game.role.Role
+import org.ReDiego0.saloonBetrayal.manager.CharacterManager
+import org.ReDiego0.saloonBetrayal.manager.RoleManager
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitRunnable
@@ -19,6 +23,11 @@ class Arena(
 
     val minPlayers = 4
     val maxPlayers = 7
+
+    val playerRoles = mutableMapOf<Player, Role>()
+    val playerCharacters = mutableMapOf<Player, PlayerCharacter>()
+    private val roleManager = RoleManager()
+    private val characterManager = CharacterManager()
 
     private var countdownTask: BukkitTask? = null
 
@@ -87,7 +96,21 @@ class Arena(
     private fun startGame() {
         state = GameState.RoleSelection(players.toList())
         teleportPlayersToSeats()
-        // TODO: llamar al GameLogicManager o como se llame para repartir roles
+
+        val assignedRoles = roleManager.assignRoles(players.toList())
+        playerRoles.putAll(assignedRoles)
+
+        val assignedCharacters = characterManager.assignCharacters(players.toList())
+        playerCharacters.putAll(assignedCharacters)
+
+        for (player in players) {
+            val role = playerRoles[player] ?: continue
+            val character = playerCharacters[player] ?: continue
+
+            val maxHealth = character.baseHealth + role.healthModifier
+
+            player.sendMessage("Role: ${role.namePath} | Character: ${character.namePath} | HP: $maxHealth")
+        }
     }
 
     private fun teleportPlayersToSeats() {
