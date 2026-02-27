@@ -1,6 +1,7 @@
 package org.ReDiego0.saloonBetrayal.game
 
 import org.ReDiego0.saloonBetrayal.SaloonBetrayal
+import org.ReDiego0.saloonBetrayal.game.card.Deck
 import org.ReDiego0.saloonBetrayal.game.character.PlayerCharacter
 import org.ReDiego0.saloonBetrayal.game.role.Role
 import org.bukkit.Location
@@ -14,9 +15,15 @@ class Arena(
     private val spawnLocations: List<Location>,
 ) {
 
+    lateinit var deck: Deck
+        private set
+    lateinit var turnManager: GameTurnManager
+        private set
+
     val players = mutableSetOf<Player>()
     var state: GameState = GameState.Waiting
         private set
+
     var isPrivate: Boolean = false
 
     val minPlayers = 4
@@ -107,6 +114,12 @@ class Arena(
 
             player.sendMessage("Role: ${role.namePath} | Character: ${character.namePath} | HP: $maxHealth")
         }
+
+        deck = Deck()
+        deck.initializeBaseDeck()
+
+        turnManager = GameTurnManager(this, deck)
+        turnManager.initialize(players.toList())
     }
 
     private fun teleportPlayersToSeats() {
@@ -126,5 +139,11 @@ class Arena(
 
     fun updateState(newState: GameState) {
         this.state = newState
+    }
+
+    fun getPlayerMaxHealth(player: Player): Int {
+        val role = playerRoles[player] ?: return 4
+        val character = playerCharacters[player] ?: return 4
+        return character.baseHealth + role.healthModifier
     }
 }

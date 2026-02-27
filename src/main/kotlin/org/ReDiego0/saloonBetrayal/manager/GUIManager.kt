@@ -44,4 +44,14 @@ class GUIManager(private val languageManager: LanguageManager) {
 
         player.openInventory(inventory)
     }
+
+    fun openDiscardMenu(player: Player, amountToDiscard: Int, handCards: List<ItemStack>) {
+        val titleMsg = languageManager.getMessage("gui.discard.title", "amount" to amountToDiscard.toString())
+        val inventory = Bukkit.createInventory(null, 54, titleMsg)
+
+        handCards.forEach { inventory.addItem(it) }
+        player.inventory.clear()
+
+        player.openInventory(inventory)
+    }
 }
