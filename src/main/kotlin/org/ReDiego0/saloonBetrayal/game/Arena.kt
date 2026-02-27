@@ -26,6 +26,8 @@ class Arena(
 
     var isPrivate: Boolean = false
 
+    val deadPlayers = mutableSetOf<Player>()
+
     val minPlayers = 4
     val maxPlayers = 7
 
@@ -146,5 +148,51 @@ class Arena(
         val role = playerRoles[player] ?: return 4
         val character = playerCharacters[player] ?: return 4
         return character.baseHealth + role.healthModifier
+    }
+
+    fun takeDamage(target: Player, amount: Int = 1) {
+        if (deadPlayers.contains(target)) return
+        val currentHealth = (target.health / 2).toInt()
+        val newHealth = currentHealth - amount
+
+        if (newHealth <= 0) {
+            handlePlayerDeath(target)
+        } else {
+            target.health = (newHealth * 2).toDouble()
+            SaloonBetrayal.instance.displayManager.updateDisplay(target, this)
+            target.playSound(target.location, org.bukkit.Sound.ENTITY_PLAYER_HURT, 1f, 1f)
+        }
+    }
+
+    private fun handlePlayerDeath(player: Player) {
+        deadPlayers.add(player)
+        players.remove(player)
+        val role = playerRoles[player]
+        val languageManager = SaloonBetrayal.instance.languageManager
+        val deathMsg = languageManager.getMessage("messages.death_reveal", "player" to player.name)
+
+        for (p in players.plus(deadPlayers)) {
+            p.sendMessage(deathMsg)
+        }
+
+        turnManager.handlePlayerDeath(player)
+
+        player.gameMode = org.bukkit.GameMode.CREATIVE
+        player.inventory.clear()
+        player.addPotionEffect(org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.INVISIBILITY, Int.MAX_VALUE, 0, false, false))
+        val skull = org.bukkit.inventory.ItemStack(org.bukkit.Material.PLAYER_HEAD)
+        val skullMeta = skull.itemMeta as org.bukkit.inventory.meta.SkullMeta
+        skullMeta.owningPlayer = player
+        skull.itemMeta = skullMeta
+        player.inventory.helmet = skull
+
+        val leaveItem = org.bukkit.inventory.ItemStack(org.bukkit.Material.RED_BED)
+        val leaveMeta = leaveItem.itemMeta
+        leaveMeta?.displayName(languageManager.getMessage("items.leave_spectate"))
+        leaveItem.itemMeta = leaveMeta
+        player.inventory.setItem(8, leaveItem)
+
+        SaloonBetrayal.instance.displayManager.removeDisplay(player)
+        // TODO: Comprobar condición de victoria (Si murió el Sheriff, o todos los forajidos)
     }
 }

@@ -1,6 +1,7 @@
 package org.ReDiego0.saloonBetrayal.listener
 
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+import org.ReDiego0.saloonBetrayal.SaloonBetrayal
 import org.ReDiego0.saloonBetrayal.game.card.CardMapper.getCardId
 import org.ReDiego0.saloonBetrayal.manager.ArenaManager
 import org.ReDiego0.saloonBetrayal.manager.LanguageManager
@@ -28,10 +29,9 @@ class GUIListener(
         val clickedInventory = event.clickedInventory ?: return
 
         val plainTitle = PlainTextComponentSerializer.plainText().serialize(view.title())
-        val equipmentTitle =
-            PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.equipment.title"))
-        val confirmEndTitle =
-            PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.confirm_end.title"))
+        val equipmentTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.equipment.title"))
+        val confirmEndTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.confirm_end.title"))
+        val drawCheckTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.draw_check.title"))
 
         val discardBaseTitle = PlainTextComponentSerializer.plainText()
             .serialize(languageManager.getMessage("gui.discard.title", "amount" to "")).replace(" ", "")
@@ -39,6 +39,7 @@ class GUIListener(
         when {
             plainTitle == equipmentTitle -> handleEquipmentMenu(event)
             plainTitle == confirmEndTitle -> handleConfirmEndMenu(event, player)
+            plainTitle == drawCheckTitle -> handleDrawCheckMenu(event, player)
             plainTitle.replace(" ", "").contains(discardBaseTitle) -> handleDiscardMenu(event, player)
         }
     }
@@ -49,12 +50,11 @@ class GUIListener(
         if (arenaManager.getArena(player) == null) return
 
         val plainTitle = PlainTextComponentSerializer.plainText().serialize(event.view.title())
-        val equipmentTitle =
-            PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.equipment.title"))
-        val confirmEndTitle =
-            PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.confirm_end.title"))
+        val equipmentTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.equipment.title"))
+        val confirmEndTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.confirm_end.title"))
+        val drawCheckTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.draw_check.title"))
 
-        if (plainTitle == equipmentTitle || plainTitle == confirmEndTitle) {
+        if (plainTitle == equipmentTitle || plainTitle == confirmEndTitle || plainTitle == drawCheckTitle) {
             val topInvSize = event.view.topInventory.size
             if (event.rawSlots.any { it < topInvSize }) {
                 event.isCancelled = true
@@ -124,7 +124,6 @@ class GUIListener(
         clickedItem.amount -= 1
         neededToDiscard -= 1
         discardTracker[player] = neededToDiscard
-
         if (neededToDiscard <= 0) {
             discardTracker.remove(player)
 
@@ -139,6 +138,15 @@ class GUIListener(
             arena.turnManager.passTurnToNext()
         } else {
             player.sendMessage(languageManager.getMessage("messages.discard_remaining", "amount" to neededToDiscard.toString()))
+        }
+    }
+
+    private fun handleDrawCheckMenu(event: InventoryClickEvent, player: Player) {
+        event.isCancelled = true
+        if (event.clickedInventory != event.view.topInventory) return
+
+        if (event.currentItem?.type == Material.PAPER) {
+            SaloonBetrayal.instance.drawCheckManager.executeDraw(player)
         }
     }
 

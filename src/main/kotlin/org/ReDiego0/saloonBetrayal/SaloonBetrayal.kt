@@ -3,6 +3,7 @@ package org.ReDiego0.saloonBetrayal
 import org.ReDiego0.saloonBetrayal.command.SaloonCommand
 import org.ReDiego0.saloonBetrayal.listener.CardListener
 import org.ReDiego0.saloonBetrayal.listener.HotkeyListener
+import org.ReDiego0.saloonBetrayal.listener.SpectatorListener
 import org.ReDiego0.saloonBetrayal.manager.*
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -25,6 +26,8 @@ class SaloonBetrayal : JavaPlugin() {
         private set
     lateinit var displayManager: DisplayManager
         private set
+    lateinit var drawCheckManager: DrawCheckManager
+        private set
 
     override fun onEnable() {
         instance = this
@@ -36,6 +39,7 @@ class SaloonBetrayal : JavaPlugin() {
         arenaManager = ArenaManager()
         guiManager = GUIManager(languageManager)
         displayManager = DisplayManager(languageManager)
+        drawCheckManager = DrawCheckManager(languageManager)
 
         registerCommands()
         registerListeners()
@@ -51,5 +55,6 @@ class SaloonBetrayal : JavaPlugin() {
         val pm = server.pluginManager
         pm.registerEvents(CardListener(arenaManager), this)
         pm.registerEvents(HotkeyListener(arenaManager, guiManager), this)
+        pm.registerEvents(SpectatorListener(arenaManager, languageManager), this)
     }
 }
