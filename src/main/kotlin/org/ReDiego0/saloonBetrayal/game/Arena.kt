@@ -26,8 +26,6 @@ class Arena(
 
     val playerRoles = mutableMapOf<Player, Role>()
     val playerCharacters = mutableMapOf<Player, PlayerCharacter>()
-    private val roleManager = RoleManager()
-    private val characterManager = CharacterManager()
 
     private var countdownTask: BukkitTask? = null
 
@@ -97,10 +95,10 @@ class Arena(
         state = GameState.RoleSelection(players.toList())
         teleportPlayersToSeats()
 
-        val assignedRoles = roleManager.assignRoles(players.toList())
+        val assignedRoles = SaloonBetrayal.instance.roleManager.assignRoles(players.toList())
         playerRoles.putAll(assignedRoles)
 
-        val assignedCharacters = characterManager.assignCharacters(players.toList())
+        val assignedCharacters = SaloonBetrayal.instance.characterManager.assignCharacters(players.toList())
         playerCharacters.putAll(assignedCharacters)
 
         for (player in players) {
