@@ -153,7 +153,7 @@ class GUIListener(
                 .serialize(languageManager.getMessage("gui.discard.title", "amount" to "")).replace(" ", "")
 
             if (plainTitle.replace(" ", "").contains(discardBaseTitle)) {
-                player.sendMessage("¡No puedes cerrar el inventario! Aún debes descartar $amountNeeded cartas.")
+                player.sendMessage(languageManager.getMessage("messages.discard_cannot_close", "amount" to amountNeeded.toString()))
 
                 val inventoryToReopen = event.inventory
                 org.bukkit.Bukkit.getScheduler().runTaskLater(
