@@ -113,6 +113,7 @@ class Arena(
             val maxHealth = character.baseHealth + role.healthModifier
 
             player.sendMessage("Role: ${role.namePath} | Character: ${character.namePath} | HP: $maxHealth")
+            SaloonBetrayal.instance.displayManager.setupDisplayForPlayer(player, this, "ABOVE")
         }
 
         deck = Deck()

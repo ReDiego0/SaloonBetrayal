@@ -23,6 +23,8 @@ class SaloonBetrayal : JavaPlugin() {
         private set
     lateinit var guiManager: GUIManager
         private set
+    lateinit var displayManager: DisplayManager
+        private set
 
     override fun onEnable() {
         instance = this
@@ -33,6 +35,7 @@ class SaloonBetrayal : JavaPlugin() {
         characterManager = CharacterManager()
         arenaManager = ArenaManager()
         guiManager = GUIManager(languageManager)
+        displayManager = DisplayManager(languageManager)
 
         registerCommands()
         registerListeners()
