@@ -4,6 +4,8 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.ReDiego0.saloonBetrayal.SaloonBetrayal
 import org.ReDiego0.saloonBetrayal.game.card.CardMapper.getCardId
 import org.ReDiego0.saloonBetrayal.game.card.CardMapper.toGameCard
+import org.ReDiego0.saloonBetrayal.game.card.PassiveCard
+import org.ReDiego0.saloonBetrayal.game.card.GameCard
 import org.ReDiego0.saloonBetrayal.manager.ArenaManager
 import org.ReDiego0.saloonBetrayal.manager.LanguageManager
 import org.bukkit.Material
@@ -68,6 +70,25 @@ class GUIListener(
             val slot = event.slot
             if (slot == 0 || slot == 1 || slot == 7 || slot == 8) {
                 event.isCancelled = true
+                return
+            }
+        }
+
+        if (event.isShiftClick && event.clickedInventory == event.view.bottomInventory) {
+            val item = event.currentItem
+            val gameCard = item?.toGameCard()
+            if (gameCard?.baseCard !is PassiveCard) {
+                event.isCancelled = true
+            }
+        }
+
+        if (event.clickedInventory == event.view.topInventory) {
+            val cursorItem = event.cursor
+            if (cursorItem != null && cursorItem.type != Material.AIR) {
+                val gameCard = cursorItem.toGameCard()
+                if (gameCard?.baseCard !is PassiveCard) {
+                    event.isCancelled = true
+                }
             }
         }
     }
@@ -156,10 +177,30 @@ class GUIListener(
     @EventHandler
     fun onInventoryClose(event: InventoryCloseEvent) {
         val player = event.player as? Player ?: return
+        val plainTitle = PlainTextComponentSerializer.plainText().serialize(event.view.title())
+
+        val equipmentTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.equipment.title"))
+        if (plainTitle == equipmentTitle) {
+            val arena = arenaManager.getArena(player) ?: return
+            val equippedCards = mutableListOf<GameCard>()
+
+            for (i in 2..6) {
+                val item = event.inventory.getItem(i)
+                val gameCard = item?.toGameCard()
+
+                if (gameCard != null && gameCard.baseCard is PassiveCard) {
+                    equippedCards.add(gameCard)
+                } else if (item != null && item.type != Material.AIR) {
+                    player.inventory.addItem(item)
+                }
+            }
+            arena.playerEquipment[player] = equippedCards
+            return
+        }
+
         val amountNeeded = discardTracker[player] ?: return
 
         if (amountNeeded > 0) {
-            val plainTitle = PlainTextComponentSerializer.plainText().serialize(event.view.title())
             val discardBaseTitle = PlainTextComponentSerializer.plainText()
                 .serialize(languageManager.getMessage("gui.discard.title", "amount" to "")).replace(" ", "")
 

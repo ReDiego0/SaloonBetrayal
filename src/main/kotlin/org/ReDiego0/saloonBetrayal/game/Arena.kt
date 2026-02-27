@@ -2,6 +2,7 @@ package org.ReDiego0.saloonBetrayal.game
 
 import org.ReDiego0.saloonBetrayal.SaloonBetrayal
 import org.ReDiego0.saloonBetrayal.game.card.Deck
+import org.ReDiego0.saloonBetrayal.game.card.GameCard
 import org.ReDiego0.saloonBetrayal.game.character.PlayerCharacter
 import org.ReDiego0.saloonBetrayal.game.role.Role
 import org.bukkit.Location
@@ -33,6 +34,7 @@ class Arena(
 
     val playerRoles = mutableMapOf<Player, Role>()
     val playerCharacters = mutableMapOf<Player, PlayerCharacter>()
+    val playerEquipment = mutableMapOf<Player, MutableList<GameCard>>()
 
     private var countdownTask: BukkitTask? = null
 
@@ -116,6 +118,7 @@ class Arena(
 
             player.sendMessage("Role: ${role.namePath} | Character: ${character.namePath} | HP: $maxHealth")
             SaloonBetrayal.instance.displayManager.setupDisplayForPlayer(player, this, "ABOVE")
+            playerEquipment[player] = mutableListOf()
         }
 
         deck = Deck()

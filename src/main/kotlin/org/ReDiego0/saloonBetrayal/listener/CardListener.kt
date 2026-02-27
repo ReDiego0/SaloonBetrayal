@@ -6,7 +6,17 @@ import org.ReDiego0.saloonBetrayal.game.card.ActiveCard
 import org.ReDiego0.saloonBetrayal.game.card.BangCard
 import org.ReDiego0.saloonBetrayal.game.card.BeerCard
 import org.ReDiego0.saloonBetrayal.game.card.CardMapper.getCardId
+import org.ReDiego0.saloonBetrayal.game.card.CatBalouCard
+import org.ReDiego0.saloonBetrayal.game.card.DuelCard
+import org.ReDiego0.saloonBetrayal.game.card.GatlingCard
+import org.ReDiego0.saloonBetrayal.game.card.GeneralStoreCard
+import org.ReDiego0.saloonBetrayal.game.card.IndiansCard
 import org.ReDiego0.saloonBetrayal.game.card.StagecoachCard
+import org.ReDiego0.saloonBetrayal.game.card.JailCard // Importamos JailCard
+import org.ReDiego0.saloonBetrayal.game.card.MissedCard
+import org.ReDiego0.saloonBetrayal.game.card.PanicCard
+import org.ReDiego0.saloonBetrayal.game.card.SaloonCard
+import org.ReDiego0.saloonBetrayal.game.card.WellsFargoCard
 import org.ReDiego0.saloonBetrayal.manager.ArenaManager
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -71,8 +81,18 @@ class CardListener(private val arenaManager: ArenaManager) : Listener {
     private fun resolveCard(id: String): ActiveCard? {
         return when (id) {
             "bang" -> BangCard
+            "missed" -> MissedCard
             "beer" -> BeerCard
+            "saloon" -> SaloonCard
             "stagecoach" -> StagecoachCard
+            "wells_fargo" -> WellsFargoCard
+            "general_store" -> GeneralStoreCard
+            "panic" -> PanicCard
+            "cat_balou" -> CatBalouCard
+            "duel" -> DuelCard
+            "indians" -> IndiansCard
+            "gatling" -> GatlingCard
+            "jail" -> JailCard
             else -> null
         }
     }
