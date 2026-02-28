@@ -116,7 +116,7 @@ class ReactionManager(
                     player.closeInventory()
                     pending.onEvade()
                 } else {
-                    player.sendMessage("§c¡Error! No se encontró la carta en tu inventario.")
+                    player.sendMessage(languageManager.getMessage("messages.error_card_not_found"))
                 }
             }
 

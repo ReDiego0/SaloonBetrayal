@@ -322,5 +322,37 @@ data object JailCard : ActiveCard {
     override val id = "jail"
     override val namePath = "cards.jail.name"
     override val descriptionPath = "cards.jail.desc"
-    override fun play(arena: Arena, player: Player, target: Player?): Boolean = true
+
+    override fun play(arena: Arena, player: Player, target: Player?): Boolean {
+        if (target == null) return false
+
+        if (player == target) {
+            player.sendMessage("§c¡No puedes encarcelarte a ti mismo!")
+            return false
+        }
+
+        if (arena.playerRoles[target] == org.ReDiego0.saloonBetrayal.game.role.Role.Sheriff) {
+            player.sendMessage("§c¡No puedes meter al Sheriff en la cárcel!")
+            return false
+        }
+
+        val targetEquipment = arena.playerEquipment[target] ?: return false
+
+        if (targetEquipment.any { it.baseCard.id == "jail" }) {
+            player.sendMessage("§c¡${target.name} ya está en la cárcel!")
+            return false
+        }
+
+        val itemInHand = player.inventory.itemInMainHand
+        val gameCard = CardMapper.run { itemInHand.toGameCard() }
+
+        if (gameCard != null) {
+            targetEquipment.add(gameCard)
+            player.sendMessage("§e¡Has metido a ${target.name} en la cárcel!")
+            target.sendMessage("§c¡${player.name} te ha metido en la cárcel!")
+            return true
+        }
+
+        return false
+    }
 }

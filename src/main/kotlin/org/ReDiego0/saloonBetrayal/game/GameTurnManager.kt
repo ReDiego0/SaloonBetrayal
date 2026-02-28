@@ -23,12 +23,78 @@ class GameTurnManager(
     private fun startTurn(player: Player) {
         hasPlayedBangThisTurn = false
         arena.updateState(GameState.Playing(player, TurnPhase.Draw))
-        processDrawPhase(player)
+
+        val equipment = arena.playerEquipment[player] ?: emptyList()
+        val dynamiteCard = equipment.firstOrNull { it.baseCard.id == "dynamite" }
+
+        if (dynamiteCard != null) {
+            player.sendMessage("§e¡Tienes la Dinamita! Desenfundando para ver si explota (Picas 2-9)...")
+
+            org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.drawCheckManager.requestDrawCheck(
+                player = player,
+                arena = arena,
+                reasonPath = "reasons.dynamite",
+                condition = { suit, rank -> suit == org.ReDiego0.saloonBetrayal.game.card.Suit.SPADES && rank.numericValue in 2..9 }
+            ) { explodes ->
+                arena.playerEquipment[player]?.remove(dynamiteCard)
+
+                if (explodes) {
+                    player.sendMessage("§c¡BOOM! La Dinamita ha explotado. Pierdes 3 puntos de vida.")
+                    arena.deck.discard(dynamiteCard)
+                    arena.takeDamage(player, 3)
+
+                    if (!arena.deadPlayers.contains(player)) {
+                        checkJailAndProceed(player)
+                    }
+                } else {
+                    player.sendMessage("§a¡Fiu! La Dinamita no explotó. Se la pasas al jugador de tu izquierda.")
+                    val nextPlayer = activePlayers[(currentPlayerIndex + 1) % activePlayers.size]
+                    arena.playerEquipment[nextPlayer]?.add(dynamiteCard)
+
+                    checkJailAndProceed(player)
+                }
+            }
+        } else {
+            checkJailAndProceed(player)
+        }
+    }
+
+    private fun checkJailAndProceed(player: Player) {
+        val equipment = arena.playerEquipment[player] ?: emptyList()
+        val jailCard = equipment.firstOrNull { it.baseCard.id == "jail" }
+
+        if (jailCard != null) {
+            arena.playerEquipment[player]?.remove(jailCard)
+            arena.deck.discard(jailCard)
+
+            player.sendMessage("§e¡Estás en la cárcel! Debes desenfundar para intentar escapar (Corazones).")
+
+            org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.drawCheckManager.requestDrawCheck(
+                player = player,
+                arena = arena,
+                reasonPath = "reasons.jail",
+                condition = { suit, _ -> suit == org.ReDiego0.saloonBetrayal.game.card.Suit.HEARTS }
+            ) { isSuccess ->
+                if (isSuccess) {
+                    player.sendMessage("§a¡Has escapado de la cárcel! Tu turno continúa normalmente.")
+                    processDrawPhase(player)
+                } else {
+                    player.sendMessage("§c¡Te quedas en la cárcel! Pierdes tu turno.")
+                    requestTurnEnd(player)
+                }
+            }
+        } else {
+            processDrawPhase(player)
+        }
     }
 
     private fun processDrawPhase(player: Player) {
         val card1 = deck.draw()
         val card2 = deck.draw()
+
+        val languageManager = org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.languageManager
+        player.inventory.addItem(org.ReDiego0.saloonBetrayal.game.card.CardMapper.run { card1.toItemStack(languageManager) })
+        player.inventory.addItem(org.ReDiego0.saloonBetrayal.game.card.CardMapper.run { card2.toItemStack(languageManager) })
 
         arena.updateState(GameState.Playing(player, TurnPhase.Action))
     }
@@ -41,7 +107,16 @@ class GameTurnManager(
         val currentState = arena.state
         if (currentState !is GameState.Playing || currentState.currentPlayer != player) return false
         if (currentState.turnPhase == TurnPhase.Discard) return true
+
         arena.updateState(GameState.Playing(player, TurnPhase.Discard))
+
+        val currentCards = player.inventory.contents.count { it != null && org.ReDiego0.saloonBetrayal.game.card.CardMapper.run { it.getCardId() } != null }
+        val currentHealth = arena.getPlayerCurrentHealth(player)
+
+        if (currentCards <= currentHealth) {
+            passTurnToNext()
+        }
+
         return true
     }
 
