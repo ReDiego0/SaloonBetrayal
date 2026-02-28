@@ -117,13 +117,23 @@ class Arena(
         val assignedCharacters = SaloonBetrayal.instance.characterManager.assignCharacters(players.toList())
         playerCharacters.putAll(assignedCharacters)
 
+        val lm = SaloonBetrayal.instance.languageManager
+
         for (player in players) {
             val role = playerRoles[player] ?: continue
             val character = playerCharacters[player] ?: continue
 
             val maxHealth = character.baseHealth + role.healthModifier
 
-            player.sendMessage("Role: ${role.namePath} | Character: ${character.namePath} | HP: $maxHealth")
+            val translatedRole = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(lm.getMessage(role.namePath))
+            val translatedChar = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(lm.getMessage(character.namePath))
+
+            player.sendMessage(lm.getMessage("messages.game_start_info",
+                "role" to translatedRole,
+                "character" to translatedChar,
+                "hp" to maxHealth.toString()
+            ))
+
             SaloonBetrayal.instance.displayManager.setupDisplayForPlayer(player, this, "ABOVE")
             playerEquipment[player] = mutableListOf()
         }

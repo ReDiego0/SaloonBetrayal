@@ -26,9 +26,10 @@ class GameTurnManager(
 
         val equipment = arena.playerEquipment[player] ?: emptyList()
         val dynamiteCard = equipment.firstOrNull { it.baseCard.id == "dynamite" }
+        val lm = org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.languageManager
 
         if (dynamiteCard != null) {
-            player.sendMessage("§e¡Tienes la Dinamita! Desenfundando para ver si explota (Picas 2-9)...")
+            player.sendMessage(lm.getMessage("messages.dynamite_check"))
 
             org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.drawCheckManager.requestDrawCheck(
                 player = player,
@@ -39,7 +40,7 @@ class GameTurnManager(
                 arena.playerEquipment[player]?.remove(dynamiteCard)
 
                 if (explodes) {
-                    player.sendMessage("§c¡BOOM! La Dinamita ha explotado. Pierdes 3 puntos de vida.")
+                    player.sendMessage(lm.getMessage("messages.dynamite_exploded"))
                     arena.deck.discard(dynamiteCard)
                     arena.takeDamage(player, 3)
 
@@ -47,7 +48,7 @@ class GameTurnManager(
                         checkJailAndProceed(player)
                     }
                 } else {
-                    player.sendMessage("§a¡Fiu! La Dinamita no explotó. Se la pasas al jugador de tu izquierda.")
+                    player.sendMessage(lm.getMessage("messages.dynamite_passed"))
                     val nextPlayer = activePlayers[(currentPlayerIndex + 1) % activePlayers.size]
                     arena.playerEquipment[nextPlayer]?.add(dynamiteCard)
 
@@ -62,12 +63,13 @@ class GameTurnManager(
     private fun checkJailAndProceed(player: Player) {
         val equipment = arena.playerEquipment[player] ?: emptyList()
         val jailCard = equipment.firstOrNull { it.baseCard.id == "jail" }
+        val lm = org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.languageManager
 
         if (jailCard != null) {
             arena.playerEquipment[player]?.remove(jailCard)
             arena.deck.discard(jailCard)
 
-            player.sendMessage("§e¡Estás en la cárcel! Debes desenfundar para intentar escapar (Corazones).")
+            player.sendMessage(lm.getMessage("messages.jail_check"))
 
             org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.drawCheckManager.requestDrawCheck(
                 player = player,
@@ -76,10 +78,10 @@ class GameTurnManager(
                 condition = { suit, _ -> suit == org.ReDiego0.saloonBetrayal.game.card.Suit.HEARTS }
             ) { isSuccess ->
                 if (isSuccess) {
-                    player.sendMessage("§a¡Has escapado de la cárcel! Tu turno continúa normalmente.")
+                    player.sendMessage(lm.getMessage("messages.jail_escaped"))
                     processDrawPhase(player)
                 } else {
-                    player.sendMessage("§c¡Te quedas en la cárcel! Pierdes tu turno.")
+                    player.sendMessage(lm.getMessage("messages.jail_failed"))
                     requestTurnEnd(player)
                 }
             }

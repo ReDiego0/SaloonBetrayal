@@ -11,25 +11,26 @@ data object BangCard : ActiveCard {
     override val descriptionPath = "cards.bang.desc"
 
     override fun play(arena: Arena, player: Player, target: Player?): Boolean {
+        val lm = org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.languageManager
         if (target == null) {
-            player.sendMessage("§cDebes hacer clic derecho sobre un jugador para usar ¡BANG!.")
+            player.sendMessage(lm.getMessage("messages.error_target_required"))
             return false
         }
 
         if (arena.turnManager.hasPlayedBangThisTurn && !arena.canPlayMultipleBangs(player)) {
-            player.sendMessage("§cSolo puedes jugar una carta ¡BANG! por turno.")
+            player.sendMessage(lm.getMessage("messages.error_bang_limit"))
             return false
         }
 
         if (!arena.canSee(player, target)) {
-            player.sendMessage("§c¡El objetivo está fuera de tu alcance!")
+            player.sendMessage(lm.getMessage("messages.error_out_of_range"))
             return false
         }
 
         arena.turnManager.registerBangPlayed()
 
-        player.sendMessage("§eHas disparado a ${target.name}! Esperando su reacción...")
-        target.sendMessage("§c¡${player.name} te ha disparado!")
+        player.sendMessage(lm.getMessage("messages.bang_fired_self", "target" to target.name))
+        target.sendMessage(lm.getMessage("messages.bang_fired_target", "player" to player.name))
 
         org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.reactionManager.requestReaction(
             arena = arena,
@@ -38,11 +39,11 @@ data object BangCard : ActiveCard {
             attacker = player,
             onHit = {
                 arena.takeDamage(target, 1)
-                player.sendMessage("§a¡Tu disparo alcanzó a ${target.name}!")
+                player.sendMessage(lm.getMessage("messages.bang_hit_self", "target" to target.name))
             },
             onEvade = {
-                player.sendMessage("§c¡${target.name} ha esquivado tu disparo!")
-                target.sendMessage("§a¡Has esquivado el disparo de ${player.name}!")
+                player.sendMessage(lm.getMessage("messages.bang_evaded_self", "target" to target.name))
+                target.sendMessage(lm.getMessage("messages.bang_evaded_target", "player" to player.name))
             }
         )
 
@@ -56,7 +57,8 @@ data object MissedCard : ActiveCard {
     override val descriptionPath = "cards.missed.desc"
 
     override fun play(arena: Arena, player: Player, target: Player?): Boolean {
-        player.sendMessage("§cSolo puedes usar esta carta cuando te disparan (como reacción).")
+        val lm = org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.languageManager
+        player.sendMessage(lm.getMessage("messages.error_missed_usage"))
         return false
     }
 }
@@ -67,8 +69,9 @@ data object BeerCard : ActiveCard {
     override val descriptionPath = "cards.beer.desc"
 
     override fun play(arena: Arena, player: Player, target: Player?): Boolean {
+        val lm = org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.languageManager
         if (arena.players.size <= 2) {
-            player.sendMessage("§c¡No puedes usar Cerveza cuando solo quedan 2 jugadores!")
+            player.sendMessage(lm.getMessage("messages.error_beer_two_players"))
             return false
         }
 
@@ -76,13 +79,13 @@ data object BeerCard : ActiveCard {
         val maxHealth = arena.getPlayerMaxHealth(player)
 
         if (currentHealth >= maxHealth) {
-            player.sendMessage("§cYa tienes la vida al máximo.")
+            player.sendMessage(lm.getMessage("messages.error_max_health"))
             return false
         }
 
         player.health = ((currentHealth + 1) * 2).toDouble()
         org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.displayManager.updateDisplay(player, arena)
-        player.sendMessage("§a¡Te has curado 1 punto de vida bebiendo cerveza!")
+        player.sendMessage(lm.getMessage("messages.beer_healed"))
         return true
     }
 }
@@ -93,6 +96,7 @@ data object SaloonCard : ActiveCard {
     override val descriptionPath = "cards.saloon.desc"
 
     override fun play(arena: Arena, player: Player, target: Player?): Boolean {
+        val lm = org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.languageManager
         arena.players.forEach { p ->
             val currentHealth = arena.getPlayerCurrentHealth(p)
             val maxHealth = arena.getPlayerMaxHealth(p)
@@ -100,7 +104,7 @@ data object SaloonCard : ActiveCard {
             if (currentHealth < maxHealth) {
                 p.health = ((currentHealth + 1) * 2).toDouble()
                 org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.displayManager.updateDisplay(p, arena)
-                p.sendMessage("§a¡Alguien invitó una ronda en el Saloon! (+1 de vida)")
+                p.sendMessage(lm.getMessage("messages.saloon_healed"))
             }
         }
         return true
@@ -113,13 +117,13 @@ data object StagecoachCard : ActiveCard {
     override val descriptionPath = "cards.stagecoach.desc"
 
     override fun play(arena: Arena, player: Player, target: Player?): Boolean {
-        val languageManager = org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.languageManager
+        val lm = org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.languageManager
         repeat(2) {
             val drawnCard = arena.deck.draw()
-            val itemStack = drawnCard.toItemStack(languageManager)
+            val itemStack = drawnCard.toItemStack(lm)
             player.inventory.addItem(itemStack)
         }
-        player.sendMessage("§eHas usado Diligencia y robado 2 cartas.")
+        player.sendMessage(lm.getMessage("messages.stagecoach_used"))
         return true
     }
 }
@@ -130,13 +134,13 @@ data object WellsFargoCard : ActiveCard {
     override val descriptionPath = "cards.wells_fargo.desc"
 
     override fun play(arena: Arena, player: Player, target: Player?): Boolean {
-        val languageManager = org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.languageManager
+        val lm = org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.languageManager
         repeat(3) {
             val drawnCard = arena.deck.draw()
-            val itemStack = drawnCard.toItemStack(languageManager)
+            val itemStack = drawnCard.toItemStack(lm)
             player.inventory.addItem(itemStack)
         }
-        player.sendMessage("§eHas usado Wells Fargo y robado 3 cartas.")
+        player.sendMessage(lm.getMessage("messages.wellsfargo_used"))
         return true
     }
 }
@@ -177,10 +181,11 @@ data object PanicCard : ActiveCard {
     val pendingPanic = mutableMapOf<Player, Player>()
 
     override fun play(arena: Arena, player: Player, target: Player?): Boolean {
+        val lm = org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.languageManager
         if (target == null) return false
 
         if (arena.getDistance(player, target) > 1) {
-            player.sendMessage("§cEl objetivo está demasiado lejos. Pánico solo tiene alcance 1.")
+            player.sendMessage(lm.getMessage("messages.error_panic_range"))
             return false
         }
 
@@ -188,7 +193,7 @@ data object PanicCard : ActiveCard {
         val hasHandCards = target.inventory.contents.any { it != null && CardMapper.run { it.getCardId() } != null }
 
         if (targetEq.isEmpty() && !hasHandCards) {
-            player.sendMessage("§cEl objetivo no tiene cartas para robar.")
+            player.sendMessage(lm.getMessage("messages.error_no_cards_to_steal"))
             return false
         }
 
@@ -202,15 +207,18 @@ data object CatBalouCard : ActiveCard {
     override val id = "cat_balou"
     override val namePath = "cards.cat_balou.name"
     override val descriptionPath = "cards.cat_balou.desc"
+
     val pendingCatBalou = mutableMapOf<Player, Player>()
 
     override fun play(arena: Arena, player: Player, target: Player?): Boolean {
+        val lm = org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.languageManager
         if (target == null) return false
+
         val targetEq = arena.playerEquipment[target] ?: emptyList()
         val hasHandCards = target.inventory.contents.any { it != null && CardMapper.run { it.getCardId() } != null }
 
         if (targetEq.isEmpty() && !hasHandCards) {
-            player.sendMessage("§cEl objetivo no tiene cartas para descartar.")
+            player.sendMessage(lm.getMessage("messages.error_no_cards_to_discard"))
             return false
         }
 
@@ -226,16 +234,18 @@ data object DuelCard : ActiveCard {
     override val descriptionPath = "cards.duel.desc"
 
     override fun play(arena: Arena, player: Player, target: Player?): Boolean {
+        val lm = org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.languageManager
         if (target == null) return false
 
-        player.sendMessage("§e¡Has desafiado a ${target.name} a un Duelo!")
-        target.sendMessage("§c¡${player.name} te ha desafiado a un Duelo!")
+        player.sendMessage(lm.getMessage("messages.duel_challenged_self", "target" to target.name))
+        target.sendMessage(lm.getMessage("messages.duel_challenged_target", "player" to player.name))
 
         startDuelPingPong(arena, target, player)
         return true
     }
 
     private fun startDuelPingPong(arena: Arena, currentDefender: Player, currentAttacker: Player) {
+        val lm = org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.languageManager
         org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.reactionManager.requestReaction(
             arena = arena,
             victim = currentDefender,
@@ -243,10 +253,10 @@ data object DuelCard : ActiveCard {
             attacker = currentAttacker,
             onHit = {
                 arena.takeDamage(currentDefender, 1)
-                currentAttacker.sendMessage("§a¡Has ganado el Duelo contra ${currentDefender.name}!")
+                currentAttacker.sendMessage(lm.getMessage("messages.duel_won", "target" to currentDefender.name))
             },
             onEvade = {
-                currentDefender.sendMessage("§e¡Has devuelto el fuego en el Duelo!")
+                currentDefender.sendMessage(lm.getMessage("messages.duel_returned_fire"))
                 startDuelPingPong(arena, currentAttacker, currentDefender)
             }
         )
@@ -259,26 +269,26 @@ data object IndiansCard : ActiveCard {
     override val descriptionPath = "cards.indians.desc"
 
     override fun play(arena: Arena, player: Player, target: Player?): Boolean {
-        player.sendMessage("§e¡Has enviado a los Indios a atacar a todos!")
+        val lm = org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.languageManager
+        player.sendMessage(lm.getMessage("messages.indians_sent"))
 
-        // Filtramos a todos los vivos menos al que jugó la carta
         val targets = arena.players.filter { it != player }
 
         for (victim in targets) {
-            victim.sendMessage("§c¡${player.name} ha llamado a los Indios! ¡Defiéndete con un ¡BANG!!")
+            victim.sendMessage(lm.getMessage("messages.indians_attacked", "player" to player.name))
 
             org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.reactionManager.requestReaction(
                 arena = arena,
                 victim = victim,
-                attackType = org.ReDiego0.saloonBetrayal.manager.AttackType.INDIANS, // Exige BANG! y no deja usar Barril
+                attackType = org.ReDiego0.saloonBetrayal.manager.AttackType.INDIANS,
                 attacker = player,
                 onHit = {
                     arena.takeDamage(victim, 1)
-                    player.sendMessage("§a¡Los Indios hirieron a ${victim.name}!")
+                    player.sendMessage(lm.getMessage("messages.indians_hit_other", "target" to victim.name))
                 },
                 onEvade = {
-                    player.sendMessage("§c¡${victim.name} logró repeler a los Indios!")
-                    victim.sendMessage("§a¡Te has defendido de los Indios de ${player.name} con éxito!")
+                    player.sendMessage(lm.getMessage("messages.indians_evaded_other", "target" to victim.name))
+                    victim.sendMessage(lm.getMessage("messages.indians_evaded_self", "player" to player.name))
                 }
             )
         }
@@ -292,12 +302,13 @@ data object GatlingCard : ActiveCard {
     override val descriptionPath = "cards.gatling.desc"
 
     override fun play(arena: Arena, player: Player, target: Player?): Boolean {
-        player.sendMessage("§e¡Has disparado la Gatling contra todos!")
+        val lm = org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.languageManager
+        player.sendMessage(lm.getMessage("messages.gatling_fired"))
 
         val targets = arena.players.filter { it != player }
 
         for (victim in targets) {
-            victim.sendMessage("§c¡${player.name} está disparando una Gatling! ¡Cúbrete!")
+            victim.sendMessage(lm.getMessage("messages.gatling_attacked", "player" to player.name))
 
             org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.reactionManager.requestReaction(
                 arena = arena,
@@ -306,11 +317,11 @@ data object GatlingCard : ActiveCard {
                 attacker = player,
                 onHit = {
                     arena.takeDamage(victim, 1)
-                    player.sendMessage("§a¡Tu Gatling alcanzó a ${victim.name}!")
+                    player.sendMessage(lm.getMessage("messages.gatling_hit_other", "target" to victim.name))
                 },
                 onEvade = {
-                    player.sendMessage("§c¡${victim.name} se cubrió de tu Gatling!")
-                    victim.sendMessage("§a¡Has esquivado la ráfaga de Gatling de ${player.name}!")
+                    player.sendMessage(lm.getMessage("messages.gatling_evaded_other", "target" to victim.name))
+                    victim.sendMessage(lm.getMessage("messages.gatling_evaded_self", "player" to player.name))
                 }
             )
         }
@@ -324,22 +335,23 @@ data object JailCard : ActiveCard {
     override val descriptionPath = "cards.jail.desc"
 
     override fun play(arena: Arena, player: Player, target: Player?): Boolean {
+        val lm = org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.languageManager
         if (target == null) return false
 
         if (player == target) {
-            player.sendMessage("§c¡No puedes encarcelarte a ti mismo!")
+            player.sendMessage(lm.getMessage("messages.error_jail_self"))
             return false
         }
 
         if (arena.playerRoles[target] == org.ReDiego0.saloonBetrayal.game.role.Role.Sheriff) {
-            player.sendMessage("§c¡No puedes meter al Sheriff en la cárcel!")
+            player.sendMessage(lm.getMessage("messages.error_jail_sheriff"))
             return false
         }
 
         val targetEquipment = arena.playerEquipment[target] ?: return false
 
         if (targetEquipment.any { it.baseCard.id == "jail" }) {
-            player.sendMessage("§c¡${target.name} ya está en la cárcel!")
+            player.sendMessage(lm.getMessage("messages.error_jail_already", "target" to target.name))
             return false
         }
 
@@ -348,8 +360,8 @@ data object JailCard : ActiveCard {
 
         if (gameCard != null) {
             targetEquipment.add(gameCard)
-            player.sendMessage("§e¡Has metido a ${target.name} en la cárcel!")
-            target.sendMessage("§c¡${player.name} te ha metido en la cárcel!")
+            player.sendMessage(lm.getMessage("messages.jail_imprisoned_self", "target" to target.name))
+            target.sendMessage(lm.getMessage("messages.jail_imprisoned_target", "player" to player.name))
             return true
         }
 

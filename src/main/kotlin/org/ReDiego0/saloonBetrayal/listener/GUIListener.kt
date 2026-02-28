@@ -107,7 +107,7 @@ class GUIListener(
 
         if (queue.isNotEmpty() && storeCards.isNotEmpty()) {
             val nextPlayer = queue.first()
-            nextPlayer.sendMessage("§e¡Es tu turno de elegir una carta del Almacén!")
+            nextPlayer.sendMessage(languageManager.getMessage("messages.general_store_turn"))
             SaloonBetrayal.instance.guiManager.openGeneralStoreMenu(nextPlayer, storeCards)
         } else {
             org.ReDiego0.saloonBetrayal.game.card.GeneralStoreCard.currentStoreCards.remove(arena.id)
@@ -138,10 +138,10 @@ class GUIListener(
 
                 if (isPanic) {
                     player.inventory.addItem(randomCard.clone().apply { amount = 1 })
-                    player.sendMessage("§aHas robado una carta al azar de la mano de ${target.name}.")
+                    player.sendMessage(languageManager.getMessage("messages.stolen_hand_card", "target" to target.name))
                 } else {
                     if (gameCard != null) arena.deck.discard(gameCard)
-                    player.sendMessage("§aHas descartado una carta al azar de la mano de ${target.name}.")
+                    player.sendMessage(languageManager.getMessage("messages.discarded_hand_card", "target" to target.name))
                 }
             }
         }
@@ -154,12 +154,11 @@ class GUIListener(
                 targetEq.remove(cardToRemove)
 
                 if (isPanic) {
-                    val languageManager = SaloonBetrayal.instance.languageManager
                     player.inventory.addItem(cardToRemove.toItemStack(languageManager))
-                    player.sendMessage("§aHas robado equipo de la mesa de ${target.name}.")
+                    player.sendMessage(languageManager.getMessage("messages.stolen_equipment", "target" to target.name))
                 } else {
                     arena.deck.discard(cardToRemove)
-                    player.sendMessage("§aHas destruido equipo de la mesa de ${target.name}.")
+                    player.sendMessage(languageManager.getMessage("messages.destroyed_equipment", "target" to target.name))
                 }
             }
         }
