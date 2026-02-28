@@ -39,7 +39,7 @@ class SaloonBetrayal : JavaPlugin() {
         languageManager = LanguageManager(this)
         roleManager = RoleManager()
         characterManager = CharacterManager()
-        arenaManager = ArenaManager()
+        arenaManager = ArenaManager(this)
         guiManager = GUIManager(languageManager)
         displayManager = DisplayManager(languageManager)
         drawCheckManager = DrawCheckManager(languageManager)
@@ -47,6 +47,7 @@ class SaloonBetrayal : JavaPlugin() {
 
         registerCommands()
         registerListeners()
+        arenaManager.loadArenas()
     }
 
     private fun registerCommands() {

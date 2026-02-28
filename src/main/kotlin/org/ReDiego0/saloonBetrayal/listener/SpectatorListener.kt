@@ -1,5 +1,6 @@
 package org.ReDiego0.saloonBetrayal.listener
 
+import org.ReDiego0.saloonBetrayal.SaloonBetrayal
 import org.ReDiego0.saloonBetrayal.manager.ArenaManager
 import org.ReDiego0.saloonBetrayal.manager.LanguageManager
 import org.bukkit.Material
@@ -44,7 +45,9 @@ class SpectatorListener(private val arenaManager: ArenaManager, private val lang
                 player.activePotionEffects.forEach { player.removePotionEffect(it.type) }
                 player.gameMode = org.bukkit.GameMode.SURVIVAL
 
-                // TODO: player.teleport(LobbyLocation)
+                val lobbyLoc = SaloonBetrayal.instance.config.getLocation("lobby") ?: org.bukkit.Bukkit.getWorlds()[0].spawnLocation
+                player.teleport(lobbyLoc)
+
                 player.sendMessage(languageManager.getMessage("spectator.respawn"))
             }
         }

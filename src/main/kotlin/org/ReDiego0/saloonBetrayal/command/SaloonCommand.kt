@@ -1,5 +1,6 @@
 package org.ReDiego0.saloonBetrayal.command
 
+import org.ReDiego0.saloonBetrayal.SaloonBetrayal
 import org.ReDiego0.saloonBetrayal.manager.ArenaManager
 import org.ReDiego0.saloonBetrayal.manager.LanguageManager
 import org.bukkit.Bukkit
@@ -28,10 +29,24 @@ class SaloonCommand(
         when (args[0].lowercase()) {
             "join" -> handleJoin(sender, args)
             "private" -> handlePrivate(sender, args)
+            "setseat" -> handleSetSeat(sender, args)
+            "reload" -> handleReload(sender)
+            "setlobby" -> handleSetLobby(sender)
             else -> sender.sendMessage(languageManager.getMessage("errors.unknown_command"))
         }
 
         return true
+    }
+
+    private fun handleSetLobby(player: Player) {
+        if (!player.hasPermission("saloon.admin")) {
+            player.sendMessage(languageManager.getMessage("errors.no_permission"))
+            return
+        }
+
+        SaloonBetrayal.instance.config.set("lobby", player.location)
+        SaloonBetrayal.instance.saveConfig()
+        player.sendMessage(languageManager.getMessage("commands.lobby_saved"))
     }
 
     private fun handleJoin(player: Player, args: Array<out String>) {
@@ -84,13 +99,58 @@ class SaloonCommand(
         }
     }
 
-    override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String> {
-        if (args.size == 1) {
-            return listOf("join", "private").filter { it.startsWith(args[0].lowercase()) }
+    private fun handleSetSeat(player: Player, args: Array<out String>) {
+        if (!player.hasPermission("saloon.admin")) {
+            player.sendMessage(languageManager.getMessage("errors.no_permission"))
+            return
         }
 
-        if (args.size == 2 && args[0].lowercase() == "join") {
-            return arenaManager.getArenaIds().filter { it.startsWith(args[1], ignoreCase = true) }
+        if (args.size < 3) {
+            player.sendMessage(languageManager.getMessage("commands.setseat_usage"))
+            return
+        }
+
+        val arenaId = args[1]
+        val seatIndex = args[2].toIntOrNull()
+
+        if (seatIndex == null || seatIndex !in 1..7) {
+            player.sendMessage(languageManager.getMessage("errors.invalid_seat"))
+            return
+        }
+
+        arenaManager.saveSeat(arenaId, seatIndex, player.location)
+        player.sendMessage(languageManager.getMessage("arenas.seat_saved", "seat" to seatIndex.toString(), "arena" to arenaId))
+    }
+
+    private fun handleReload(player: Player) {
+        if (!player.hasPermission("saloon.admin")) {
+            player.sendMessage(languageManager.getMessage("errors.no_permission"))
+            return
+        }
+
+        SaloonBetrayal.instance.reloadConfig()
+        arenaManager.loadArenas()
+        player.sendMessage(languageManager.getMessage("commands.reload_success"))
+    }
+
+    override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String> {
+        if (args.size == 1) {
+            val list = mutableListOf("join", "private")
+            if (sender.hasPermission("saloon.admin")) {
+                list.addAll(listOf("setseat", "reload", "setlobby"))
+            }
+            return list.filter { it.startsWith(args[0].lowercase()) }
+        }
+
+        if (args.size == 2) {
+            when (args[0].lowercase()) {
+                "join" -> return arenaManager.getArenaIds().filter { it.startsWith(args[1], ignoreCase = true) }
+                "setseat" -> return listOf("saloon1", "arena_test")
+            }
+        }
+
+        if (args.size == 3 && args[0].lowercase() == "setseat") {
+            return (1..7).map { it.toString() }.filter { it.startsWith(args[2]) }
         }
 
         return emptyList()

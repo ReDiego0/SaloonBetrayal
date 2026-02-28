@@ -1,15 +1,11 @@
-# ==========================================
 # PALOS DE LA BARAJA
-# ==========================================
 suits:
   spades: "Picas ♠"
   hearts: "Corazones ♥"
   clubs: "Tréboles ♣"
   diamonds: "Diamantes ♦"
 
-# ==========================================
 # CARTAS (Nombres y Descripciones)
-# ==========================================
 cards:
   # Cartas Activas
   bang:
@@ -83,9 +79,7 @@ cards:
     name: "&4Dinamita"
     desc: "&7Desenfundar: Si sale Picas 2-9, pierdes 3 vidas."
 
-# ==========================================
 # ROLES Y PERSONAJES
-# ==========================================
 roles:
   sheriff:
     name: "&eSheriff"
@@ -113,9 +107,7 @@ characters:
     name: "&eWilly the Kid"
     desc: "&7Puede jugar cualquier número de cartas ¡BANG! en su turno."
 
-# ==========================================
 # MENSAJES DEL JUEGO
-# ==========================================
 messages:
   # Partida y Turnos
   game_start_info: "&7Tu Rol: %role% &8| &7Personaje: %character% &8| &cVida: %hp%❤"
@@ -197,9 +189,7 @@ messages:
   discard_remaining: "&eAún debes descartar %amount% cartas más."
   discard_cannot_close: "&c¡Debes descartar %amount% cartas antes de cerrar el inventario!"
 
-# ==========================================
 # MENÚS (GUI) Y ELEMENTOS VISUALES
-# ==========================================
 gui:
   actions:
     steal: "Robar"
@@ -234,3 +224,28 @@ items:
 
 spectator:
   respawn: "&aHas abandonado el modo espectador."
+
+# Errores generales
+player_only: "&cEste comando solo puede ser usado por jugadores."
+unknown_command: "&cComando desconocido. Usa /saloon"
+no_permission: "&cNo tienes permisos para hacer esto."
+player_offline: "&cEl jugador %player% no está conectado."
+invalid_seat: "&cEl número de asiento debe estar entre 1 y 7."
+
+# Ayuda de comandos
+help: "&eUso: /saloon <join|private>"
+private_usage: "&eUso: /saloon private <jugador1> <jugador2>..."
+setseat_usage: "&eUso: /saloon setseat <nombre_arena> <1-7>"
+reload_success: "&aConfiguración y Arenas recargadas con éxito."
+
+# Arenas
+join_random_success: "&a¡Te has unido a una arena disponible!"
+no_available_arenas: "&cNo hay arenas disponibles en este momento."
+join_specific_success: "&a¡Te has unido a la arena %arena%!"
+join_specific_fail: "&cNo se pudo entrar a la arena %arena% (llena o en juego)."
+private_created: "&a¡%leader% ha creado una partida privada!"
+private_fail: "&cNo hay arenas libres para crear una partida privada."
+seat_saved: "&aAsiento %seat% guardado para la arena %arena%."
+
+lobby_saved: "&a¡Ubicación del Lobby principal guardada correctamente!"
+setlobby_usage: "&eUso: /saloon setlobby"

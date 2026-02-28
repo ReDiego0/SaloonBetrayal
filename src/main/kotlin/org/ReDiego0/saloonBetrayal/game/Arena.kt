@@ -310,7 +310,8 @@ class Arena(
     private fun resetArena() {
         val allPlayers = players.plus(deadPlayers)
 
-        // TODO: Enviar a los jugadores pal lobby
+        val lobbyLoc = plugin.config.getLocation("lobby") ?: org.bukkit.Bukkit.getWorlds()[0].spawnLocation
+
         allPlayers.forEach { p ->
             p.inventory.clear()
             p.activePotionEffects.forEach { p.removePotionEffect(it.type) }
@@ -318,6 +319,8 @@ class Arena(
             p.foodLevel = 20
             p.gameMode = org.bukkit.GameMode.SURVIVAL
             SaloonBetrayal.instance.displayManager.removeDisplay(p)
+
+            p.teleport(lobbyLoc)
         }
 
         players.clear()
