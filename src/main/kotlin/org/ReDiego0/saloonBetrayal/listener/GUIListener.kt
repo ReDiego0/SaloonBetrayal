@@ -113,12 +113,15 @@ class GUIListener(
                     }
                 }
 
-                val maxHealth = arena.getPlayerMaxHealth(player)
+                val currentHealth = arena.getPlayerCurrentHealth(player)
 
-                if (totalCards > maxHealth) {
-                    val amountToDiscard = totalCards - maxHealth
+                if (totalCards > currentHealth) {
+                    val amountToDiscard = totalCards - currentHealth
                     discardTracker[player] = amountToDiscard
-                    org.ReDiego0.saloonBetrayal.SaloonBetrayal.instance.guiManager.openDiscardMenu(
+
+                    arena.turnManager.requestTurnEnd(player)
+
+                    SaloonBetrayal.instance.guiManager.openDiscardMenu(
                         player,
                         amountToDiscard,
                         handCards
@@ -182,6 +185,12 @@ class GUIListener(
         val equipmentTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.equipment.title"))
         if (plainTitle == equipmentTitle) {
             val arena = arenaManager.getArena(player) ?: return
+
+            if (arena.state is org.ReDiego0.saloonBetrayal.game.GameState.Playing &&
+                (arena.state as org.ReDiego0.saloonBetrayal.game.GameState.Playing).turnPhase == org.ReDiego0.saloonBetrayal.game.TurnPhase.Discard) {
+                return
+            }
+
             val equippedCards = mutableListOf<GameCard>()
 
             for (i in 2..6) {

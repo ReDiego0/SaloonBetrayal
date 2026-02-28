@@ -1,5 +1,6 @@
 package org.ReDiego0.saloonBetrayal.game.card
 
+import org.ReDiego0.saloonBetrayal.game.Arena
 import org.bukkit.entity.Player
 
 enum class Suit(val namePath: String) {
@@ -28,7 +29,7 @@ sealed interface Card {
 }
 
 sealed interface ActiveCard : Card {
-    fun play(player: Player, target: Player? = null): Boolean
+    fun play(arena: Arena, player: Player, target: Player? = null): Boolean
 }
 
 enum class EquipSlotType {

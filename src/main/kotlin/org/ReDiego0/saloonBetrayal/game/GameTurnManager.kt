@@ -32,8 +32,7 @@ class GameTurnManager(
     fun requestTurnEnd(player: Player): Boolean {
         val currentState = arena.state
         if (currentState !is GameState.Playing || currentState.currentPlayer != player) return false
-        if (currentState.turnPhase != TurnPhase.Action) return false
-
+        if (currentState.turnPhase == TurnPhase.Discard) return true
         arena.updateState(GameState.Playing(player, TurnPhase.Discard))
         return true
     }

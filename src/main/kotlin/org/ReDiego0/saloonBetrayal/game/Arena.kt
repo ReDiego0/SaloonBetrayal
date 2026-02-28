@@ -160,6 +160,10 @@ class Arena(
         return character.baseHealth + role.healthModifier
     }
 
+    fun getPlayerCurrentHealth(player: Player): Int {
+        return (player.health / 2).toInt()
+    }
+
     fun takeDamage(target: Player, amount: Int = 1) {
         if (deadPlayers.contains(target)) return
         val currentHealth = (target.health / 2).toInt()

@@ -46,7 +46,7 @@ class CardListener(private val arenaManager: ArenaManager) : Listener {
 
         val card = resolveCard(cardId) as? ActiveCard ?: return
 
-        val success = card.play(player)
+        val success = card.play(arena, player)
         if (success) {
             item.amount -= 1
         }
@@ -72,7 +72,7 @@ class CardListener(private val arenaManager: ArenaManager) : Listener {
 
         val card = resolveCard(cardId) as? ActiveCard ?: return
 
-        val success = card.play(player, target)
+        val success = card.play(arena, player, target)
         if (success) {
             item.amount -= 1
         }
