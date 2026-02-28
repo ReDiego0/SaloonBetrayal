@@ -4,6 +4,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.ReDiego0.saloonBetrayal.SaloonBetrayal
 import org.ReDiego0.saloonBetrayal.game.card.CardMapper.getCardId
 import org.ReDiego0.saloonBetrayal.game.card.CardMapper.toGameCard
+import org.ReDiego0.saloonBetrayal.game.card.CardMapper.toItemStack
 import org.ReDiego0.saloonBetrayal.game.card.PassiveCard
 import org.ReDiego0.saloonBetrayal.game.card.GameCard
 import org.ReDiego0.saloonBetrayal.manager.ArenaManager
@@ -36,24 +37,23 @@ class GUIListener(
         val confirmEndTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.confirm_end.title"))
         val drawCheckTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.draw_check.title"))
         val reactionTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.reaction.title"))
+        val generalStoreTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.general_store.title"))
 
         val discardBaseTitle = PlainTextComponentSerializer.plainText()
             .serialize(languageManager.getMessage("gui.discard.title", "amount" to "")).replace(" ", "")
+
+        val isTargetCardMenu = org.ReDiego0.saloonBetrayal.game.card.PanicCard.pendingPanic.containsKey(player) ||
+                org.ReDiego0.saloonBetrayal.game.card.CatBalouCard.pendingCatBalou.containsKey(player)
 
         when {
             plainTitle == equipmentTitle -> handleEquipmentMenu(event)
             plainTitle == confirmEndTitle -> handleConfirmEndMenu(event, player)
             plainTitle == drawCheckTitle -> handleDrawCheckMenu(event, player)
             plainTitle == reactionTitle -> handleReactionMenu(event, player)
+            plainTitle == generalStoreTitle -> handleGeneralStoreMenu(event, player)
+            isTargetCardMenu -> handleTargetCardMenu(event, player)
             plainTitle.replace(" ", "").contains(discardBaseTitle) -> handleDiscardMenu(event, player)
         }
-    }
-
-    private fun handleReactionMenu(event: InventoryClickEvent, player: Player) {
-        event.isCancelled = true
-        if (event.clickedInventory != event.view.topInventory) return
-
-        SaloonBetrayal.instance.reactionManager.handleReactionClick(player, event.slot, event.currentItem)
     }
 
     @EventHandler
@@ -66,13 +66,107 @@ class GUIListener(
         val confirmEndTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.confirm_end.title"))
         val drawCheckTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.draw_check.title"))
         val reactionTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.reaction.title"))
+        val generalStoreTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.general_store.title"))
 
-        if (plainTitle == equipmentTitle || plainTitle == confirmEndTitle || plainTitle == drawCheckTitle || plainTitle == reactionTitle) {
+        val isTargetCardMenu = org.ReDiego0.saloonBetrayal.game.card.PanicCard.pendingPanic.containsKey(player) ||
+                org.ReDiego0.saloonBetrayal.game.card.CatBalouCard.pendingCatBalou.containsKey(player)
+
+        if (plainTitle == equipmentTitle || plainTitle == confirmEndTitle || plainTitle == drawCheckTitle || plainTitle == reactionTitle || plainTitle == generalStoreTitle || isTargetCardMenu) {
             val topInvSize = event.view.topInventory.size
             if (event.rawSlots.any { it < topInvSize }) {
                 event.isCancelled = true
             }
         }
+    }
+
+    private fun handleReactionMenu(event: InventoryClickEvent, player: Player) {
+        event.isCancelled = true
+        if (event.clickedInventory != event.view.topInventory) return
+        SaloonBetrayal.instance.reactionManager.handleReactionClick(player, event.slot, event.currentItem)
+    }
+
+    private fun handleGeneralStoreMenu(event: InventoryClickEvent, player: Player) {
+        event.isCancelled = true
+        if (event.clickedInventory != event.view.topInventory) return
+
+        val clickedItem = event.currentItem ?: return
+        val gameCard = clickedItem.toGameCard() ?: return
+
+        val arena = arenaManager.getArena(player) ?: return
+        val storeCards = org.ReDiego0.saloonBetrayal.game.card.GeneralStoreCard.currentStoreCards[arena.id] ?: return
+        val queue = org.ReDiego0.saloonBetrayal.game.card.GeneralStoreCard.pickingQueue[arena.id] ?: return
+
+        if (queue.firstOrNull() != player) return
+
+        player.inventory.addItem(clickedItem.clone().apply { amount = 1 })
+        val cardToRemove = storeCards.firstOrNull { it.baseCard.id == gameCard.baseCard.id && it.suit == gameCard.suit && it.rank == gameCard.rank }
+        if (cardToRemove != null) storeCards.remove(cardToRemove)
+
+        player.closeInventory()
+        queue.removeAt(0)
+
+        if (queue.isNotEmpty() && storeCards.isNotEmpty()) {
+            val nextPlayer = queue.first()
+            nextPlayer.sendMessage("§e¡Es tu turno de elegir una carta del Almacén!")
+            SaloonBetrayal.instance.guiManager.openGeneralStoreMenu(nextPlayer, storeCards)
+        } else {
+            org.ReDiego0.saloonBetrayal.game.card.GeneralStoreCard.currentStoreCards.remove(arena.id)
+            org.ReDiego0.saloonBetrayal.game.card.GeneralStoreCard.pickingQueue.remove(arena.id)
+            storeCards.forEach { arena.deck.discard(it) }
+        }
+    }
+
+    private fun handleTargetCardMenu(event: InventoryClickEvent, player: Player) {
+        event.isCancelled = true
+        if (event.clickedInventory != event.view.topInventory) return
+
+        val arena = arenaManager.getArena(player) ?: return
+        val isPanic = org.ReDiego0.saloonBetrayal.game.card.PanicCard.pendingPanic.containsKey(player)
+
+        val target = (if (isPanic) org.ReDiego0.saloonBetrayal.game.card.PanicCard.pendingPanic[player]
+        else org.ReDiego0.saloonBetrayal.game.card.CatBalouCard.pendingCatBalou[player]) ?: return
+
+        val clickedItem = event.currentItem ?: return
+
+        if (event.slot == 22 && clickedItem.type == Material.PAPER) {
+            val handCards = target.inventory.contents.filter { it != null && it.getCardId() != null }
+            if (handCards.isNotEmpty()) {
+                val randomCard = handCards.random()!!
+                val gameCard = randomCard.toGameCard()
+
+                randomCard.amount -= 1
+
+                if (isPanic) {
+                    player.inventory.addItem(randomCard.clone().apply { amount = 1 })
+                    player.sendMessage("§aHas robado una carta al azar de la mano de ${target.name}.")
+                } else {
+                    if (gameCard != null) arena.deck.discard(gameCard)
+                    player.sendMessage("§aHas descartado una carta al azar de la mano de ${target.name}.")
+                }
+            }
+        }
+        else {
+            val gameCard = clickedItem.toGameCard() ?: return
+            val targetEq = arena.playerEquipment[target] ?: return
+
+            val cardToRemove = targetEq.firstOrNull { it.baseCard.id == gameCard.baseCard.id && it.suit == gameCard.suit && it.rank == gameCard.rank }
+            if (cardToRemove != null) {
+                targetEq.remove(cardToRemove)
+
+                if (isPanic) {
+                    val languageManager = SaloonBetrayal.instance.languageManager
+                    player.inventory.addItem(cardToRemove.toItemStack(languageManager))
+                    player.sendMessage("§aHas robado equipo de la mesa de ${target.name}.")
+                } else {
+                    arena.deck.discard(cardToRemove)
+                    player.sendMessage("§aHas destruido equipo de la mesa de ${target.name}.")
+                }
+            }
+        }
+        if (isPanic) org.ReDiego0.saloonBetrayal.game.card.PanicCard.pendingPanic.remove(player)
+        else org.ReDiego0.saloonBetrayal.game.card.CatBalouCard.pendingCatBalou.remove(player)
+
+        player.closeInventory()
     }
 
     private fun handleEquipmentMenu(event: InventoryClickEvent) {
@@ -151,7 +245,6 @@ class GUIListener(
         if (event.clickedInventory != event.view.topInventory) return
 
         val clickedItem = event.currentItem ?: return
-
         val gameCard = clickedItem.toGameCard() ?: return
 
         val arena = arenaManager.getArena(player) ?: return
@@ -218,7 +311,15 @@ class GUIListener(
         }
 
         val reactionTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.reaction.title"))
-        if (plainTitle == reactionTitle && SaloonBetrayal.instance.reactionManager.pendingReactions.containsKey(player)) {
+        val generalStoreTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.general_store.title"))
+        val isTargetCardMenu = org.ReDiego0.saloonBetrayal.game.card.PanicCard.pendingPanic.containsKey(player) ||
+                org.ReDiego0.saloonBetrayal.game.card.CatBalouCard.pendingCatBalou.containsKey(player)
+
+        val isForcedAction = (plainTitle == reactionTitle && SaloonBetrayal.instance.reactionManager.pendingReactions.containsKey(player)) ||
+                (plainTitle == generalStoreTitle && org.ReDiego0.saloonBetrayal.game.card.GeneralStoreCard.pickingQueue.values.any { it.firstOrNull() == player }) ||
+                isTargetCardMenu
+
+        if (isForcedAction) {
             val inventoryToReopen = event.inventory
             org.bukkit.Bukkit.getScheduler().runTaskLater(
                 SaloonBetrayal.instance,

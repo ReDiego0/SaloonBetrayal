@@ -1,6 +1,9 @@
 package org.ReDiego0.saloonBetrayal.manager
 
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+import org.ReDiego0.saloonBetrayal.game.card.CardMapper.toItemStack
+import org.ReDiego0.saloonBetrayal.game.card.GameCard
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -51,6 +54,40 @@ class GUIManager(private val languageManager: LanguageManager) {
 
         handCards.forEach { inventory.addItem(it) }
         player.inventory.clear()
+
+        player.openInventory(inventory)
+    }
+
+    fun openTargetCardMenu(attacker: Player, targetName: String, equipment: List<GameCard>, hasHandCards: Boolean, actionMsgPath: String) {
+        val actionText = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage(actionMsgPath))
+        val titleComponent = languageManager.getMessage("gui.target_cards.title", "action" to actionText, "target" to targetName)
+
+        val inventory = Bukkit.createInventory(null, 27, titleComponent)
+
+        equipment.forEachIndexed { index, card ->
+            if (index < 9) {
+                inventory.setItem(index, card.toItemStack(languageManager))
+            }
+        }
+
+        if (hasHandCards) {
+            val handItem = ItemStack(Material.PAPER)
+            val meta = handItem.itemMeta
+            meta?.displayName(languageManager.getMessage("gui.target_cards.hand_cards"))
+            handItem.itemMeta = meta
+            inventory.setItem(22, handItem)
+        }
+
+        attacker.openInventory(inventory)
+    }
+
+    fun openGeneralStoreMenu(player: Player, storeCards: List<GameCard>) {
+        val title = languageManager.getMessage("gui.general_store.title")
+        val inventory = Bukkit.createInventory(null, 9, title)
+
+        storeCards.forEach { card ->
+            inventory.addItem(card.toItemStack(languageManager))
+        }
 
         player.openInventory(inventory)
     }

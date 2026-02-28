@@ -105,9 +105,12 @@ class ReactionManager(
                 val cardToRemove = player.inventory.contents.firstOrNull { it != null && it.getCardId() == requiredCardId }
 
                 if (cardToRemove != null) {
+                    val gameCard = org.ReDiego0.saloonBetrayal.game.card.CardMapper.run { cardToRemove.toGameCard() }
                     cardToRemove.amount -= 1
 
-                    // TODO: Botar esa carta a la pila de descartes usando CardMapper.toGameCard()
+                    if (gameCard != null) {
+                        arena.deck.discard(gameCard)
+                    }
 
                     pendingReactions.remove(player)
                     player.closeInventory()
