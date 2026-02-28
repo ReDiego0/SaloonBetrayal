@@ -35,6 +35,7 @@ class GUIListener(
         val equipmentTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.equipment.title"))
         val confirmEndTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.confirm_end.title"))
         val drawCheckTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.draw_check.title"))
+        val reactionTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.reaction.title"))
 
         val discardBaseTitle = PlainTextComponentSerializer.plainText()
             .serialize(languageManager.getMessage("gui.discard.title", "amount" to "")).replace(" ", "")
@@ -43,8 +44,16 @@ class GUIListener(
             plainTitle == equipmentTitle -> handleEquipmentMenu(event)
             plainTitle == confirmEndTitle -> handleConfirmEndMenu(event, player)
             plainTitle == drawCheckTitle -> handleDrawCheckMenu(event, player)
+            plainTitle == reactionTitle -> handleReactionMenu(event, player)
             plainTitle.replace(" ", "").contains(discardBaseTitle) -> handleDiscardMenu(event, player)
         }
+    }
+
+    private fun handleReactionMenu(event: InventoryClickEvent, player: Player) {
+        event.isCancelled = true
+        if (event.clickedInventory != event.view.topInventory) return
+
+        SaloonBetrayal.instance.reactionManager.handleReactionClick(player, event.slot, event.currentItem)
     }
 
     @EventHandler
@@ -56,8 +65,9 @@ class GUIListener(
         val equipmentTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.equipment.title"))
         val confirmEndTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.confirm_end.title"))
         val drawCheckTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.draw_check.title"))
+        val reactionTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.reaction.title"))
 
-        if (plainTitle == equipmentTitle || plainTitle == confirmEndTitle || plainTitle == drawCheckTitle) {
+        if (plainTitle == equipmentTitle || plainTitle == confirmEndTitle || plainTitle == drawCheckTitle || plainTitle == reactionTitle) {
             val topInvSize = event.view.topInventory.size
             if (event.rawSlots.any { it < topInvSize }) {
                 event.isCancelled = true
@@ -207,8 +217,18 @@ class GUIListener(
             return
         }
 
-        val amountNeeded = discardTracker[player] ?: return
+        val reactionTitle = PlainTextComponentSerializer.plainText().serialize(languageManager.getMessage("gui.reaction.title"))
+        if (plainTitle == reactionTitle && SaloonBetrayal.instance.reactionManager.pendingReactions.containsKey(player)) {
+            val inventoryToReopen = event.inventory
+            org.bukkit.Bukkit.getScheduler().runTaskLater(
+                SaloonBetrayal.instance,
+                Runnable { player.openInventory(inventoryToReopen) },
+                1L
+            )
+            return
+        }
 
+        val amountNeeded = discardTracker[player] ?: return
         if (amountNeeded > 0) {
             val discardBaseTitle = PlainTextComponentSerializer.plainText()
                 .serialize(languageManager.getMessage("gui.discard.title", "amount" to "")).replace(" ", "")
