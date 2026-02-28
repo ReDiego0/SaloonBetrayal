@@ -2,3 +2,18 @@ name: SaloonBetrayal
 version: '1.0.0'
 main: org.ReDiego0.saloonBetrayal.SaloonBetrayal
 api-version: '1.21'
+description: ¡El clásico juego de cartas del Salvaje Oeste recreado en Minecraft!
+author: ReDiego0
+
+commands:
+  saloon:
+    description: Comando principal para jugar y administrar SaloonBetrayal.
+    usage: /saloon <join|private|setseat|setlobby|reload>
+    aliases:
+      - sb
+      - saloonbetrayal
+
+permissions:
+  saloon.admin:
+    description: Permite configurar las arenas, los asientos, el lobby y recargar el plugin.
+    default: op
