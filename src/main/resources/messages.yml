@@ -1,0 +1,236 @@
+# ==========================================
+# PALOS DE LA BARAJA
+# ==========================================
+suits:
+  spades: "Picas ♠"
+  hearts: "Corazones ♥"
+  clubs: "Tréboles ♣"
+  diamonds: "Diamantes ♦"
+
+# ==========================================
+# CARTAS (Nombres y Descripciones)
+# ==========================================
+cards:
+  # Cartas Activas
+  bang:
+    name: "&c¡BANG!"
+    desc: "&7Dispara a un jugador a tu alcance para quitarle 1 punto de vida."
+  missed:
+    name: "&a¡Fallaste!"
+    desc: "&7Evita perder un punto de vida por un ¡BANG!."
+  beer:
+    name: "&eCerveza"
+    desc: "&7Recupera 1 punto de vida."
+  saloon:
+    name: "&eSaloon"
+    desc: "&7Recupera 1 punto de vida a TODOS los jugadores."
+  stagecoach:
+    name: "&bDiligencia"
+    desc: "&7Roba 2 cartas."
+  wells_fargo:
+    name: "&bWells Fargo"
+    desc: "&7Roba 3 cartas."
+  general_store:
+    name: "&dAlmacén"
+    desc: "&7Revela cartas igual al número de jugadores vivos. Cada uno elige una."
+  panic:
+    name: "&6Pánico"
+    desc: "&7Roba una carta de un jugador a distancia 1."
+  cat_balou:
+    name: "&6Cat Balou"
+    desc: "&7Haz que cualquier jugador descarte una carta."
+  duel:
+    name: "&cDuelo"
+    desc: "&7Desafía a un jugador. Quien no juegue un ¡BANG! pierde 1 vida."
+  indians:
+    name: "&c¡Indios!"
+    desc: "&7Todos los demás jugadores deben jugar un ¡BANG! o perder 1 vida."
+  gatling:
+    name: "&c¡Gatling!"
+    desc: "&7Dispara a todos los demás jugadores."
+  jail:
+    name: "&9Cárcel"
+    desc: "&7Juega esta carta frente a otro jugador para que pierda su turno."
+
+  # Armas
+  volcanic:
+    name: "&8Volcanic"
+    desc: "&7Arma (Alcance 1). Puedes jugar cualquier número de ¡BANG!."
+  schofield:
+    name: "&8Schofield"
+    desc: "&7Arma (Alcance 2)."
+  remington:
+    name: "&8Remington"
+    desc: "&7Arma (Alcance 3)."
+  rev_carabine:
+    name: "&8Rev. Carabine"
+    desc: "&7Arma (Alcance 4)."
+  winchester:
+    name: "&8Winchester"
+    desc: "&7Arma (Alcance 5)."
+
+  # Pasivas
+  mustang:
+    name: "&9Mustang"
+    desc: "&7Los demás te ven a Distancia +1."
+  scope:
+    name: "&9Mirilla"
+    desc: "&7Ves a los demás a Distancia -1."
+  barrel:
+    name: "&9Barril"
+    desc: "&7Desenfundar: Si sale Corazones, esquivas un ¡BANG!."
+  dynamite:
+    name: "&4Dinamita"
+    desc: "&7Desenfundar: Si sale Picas 2-9, pierdes 3 vidas."
+
+# ==========================================
+# ROLES Y PERSONAJES
+# ==========================================
+roles:
+  sheriff:
+    name: "&eSheriff"
+  deputy:
+    name: "&bAlguacil"
+  outlaw:
+    name: "&cForajido"
+  renegade:
+    name: "&8Renegado"
+
+characters:
+  bart_cassidy:
+    name: "&eBart Cassidy"
+    desc: "&7Cada vez que pierde un punto de vida, roba una carta."
+  calamity_janet:
+    name: "&eCalamity Janet"
+    desc: "&7Puede jugar cartas ¡BANG! como Fallaste y viceversa."
+  el_gringo:
+    name: "&eEl Gringo"
+    desc: "&7Cada vez que pierde un punto de vida por el ataque de un jugador, roba una carta de su mano."
+  paul_regret:
+    name: "&ePaul Regret"
+    desc: "&7Todos los jugadores lo ven a una distancia +1."
+  willy_the_kid:
+    name: "&eWilly the Kid"
+    desc: "&7Puede jugar cualquier número de cartas ¡BANG! en su turno."
+
+# ==========================================
+# MENSAJES DEL JUEGO
+# ==========================================
+messages:
+  # Partida y Turnos
+  game_start_info: "&7Tu Rol: %role% &8| &7Personaje: %character% &8| &cVida: %hp%❤"
+  death_reveal: "&c☠ ¡%player% ha muerto!"
+  win_renegade: "&8¡El Renegado ha ganado!"
+  win_outlaws: "&c¡Los Forajidos han ganado!"
+  win_law: "&e¡El Sheriff y los Alguaciles han ganado!"
+  win_subtitle: "&7La partida ha terminado."
+
+  # Sistema de Desenfundar (Draw Check)
+  draw_hover_format: "&e%name% &8- %suit% %rank%\n&7%desc%"
+  draw_broadcast: "&e%player% &7está desenfundando por: %reason%\n&8(&7Carta revelada: %card_hover%&8)"
+  draw_success: "&a¡Desenfunde exitoso!"
+  draw_fail: "&c¡El desenfunde ha fallado!"
+
+  # Dinamita y Cárcel
+  dynamite_check: "&e¡Tienes la Dinamita! Desenfundando para ver si explota (Picas 2-9)..."
+  dynamite_exploded: "&c¡BOOM! La Dinamita ha explotado. Pierdes 3 puntos de vida."
+  dynamite_passed: "&a¡Fiu! La Dinamita no explotó. Se la pasas al jugador de tu izquierda."
+  jail_check: "&e¡Estás en la cárcel! Debes desenfundar para intentar escapar (Corazones)."
+  jail_escaped: "&a¡Has escapado de la cárcel! Tu turno continúa normalmente."
+  jail_failed: "&c¡Te quedas en la cárcel! Pierdes tu turno."
+
+  # Combate: Bang y Reacciones
+  bang_fired_self: "&eHas disparado a %target%! Esperando su reacción..."
+  bang_fired_target: "&c¡%player% te ha disparado!"
+  bang_hit_self: "&a¡Tu disparo alcanzó a %target%!"
+  bang_evaded_self: "&c¡%target% ha esquivado tu disparo!"
+  bang_evaded_target: "&a¡Has esquivado el disparo de %player%!"
+
+  duel_challenged_self: "&e¡Has desafiado a %target% a un Duelo!"
+  duel_challenged_target: "&c¡%player% te ha desafiado a un Duelo!"
+  duel_won: "&a¡Has ganado el Duelo contra %target%!"
+  duel_returned_fire: "&e¡Has devuelto el fuego en el Duelo!"
+
+  indians_sent: "&e¡Has enviado a los Indios a atacar a todos!"
+  indians_attacked: "&c¡%player% ha llamado a los Indios! ¡Defiéndete con un ¡BANG!!"
+  indians_hit_other: "&a¡Los Indios hirieron a %target%!"
+  indians_evaded_other: "&c¡%target% logró repeler a los Indios!"
+  indians_evaded_self: "&a¡Te has defendido de los Indios de %player% con éxito!"
+
+  gatling_fired: "&e¡Has disparado la Gatling contra todos!"
+  gatling_attacked: "&c¡%player% está disparando una Gatling! ¡Cúbrete!"
+  gatling_hit_other: "&a¡Tu Gatling alcanzó a %target%!"
+  gatling_evaded_other: "&c¡%target% se cubrió de tu Gatling!"
+  gatling_evaded_self: "&a¡Has esquivado la ráfaga de Gatling de %player%!"
+
+  # Cartas de Robo y Curación
+  beer_healed: "&a¡Te has curado 1 punto de vida bebiendo cerveza!"
+  saloon_healed: "&a¡Alguien invitó una ronda en el Saloon! (+1 de vida)"
+  stagecoach_used: "&eHas usado Diligencia y robado 2 cartas."
+  wellsfargo_used: "&eHas usado Wells Fargo y robado 3 cartas."
+  general_store_turn: "&e¡Es tu turno de elegir una carta del Almacén!"
+
+  stolen_hand_card: "&aHas robado una carta al azar de la mano de %target%."
+  discarded_hand_card: "&aHas descartado una carta al azar de la mano de %target%."
+  stolen_equipment: "&aHas robado equipo de la mesa de %target%."
+  destroyed_equipment: "&aHas destruido equipo de la mesa de %target%."
+
+  jail_imprisoned_self: "&e¡Has metido a %target% en la cárcel!"
+  jail_imprisoned_target: "&c¡%player% te ha metido en la cárcel!"
+
+  # Errores
+  error_target_required: "&cDebes hacer clic derecho sobre un jugador para usar ¡BANG!."
+  error_bang_limit: "&cSolo puedes jugar una carta ¡BANG! por turno."
+  error_out_of_range: "&c¡El objetivo está fuera de tu alcance!"
+  error_missed_usage: "&cSolo puedes usar esta carta cuando te disparan (como reacción)."
+  error_beer_two_players: "&c¡No puedes usar Cerveza cuando solo quedan 2 jugadores!"
+  error_max_health: "&cYa tienes la vida al máximo."
+  error_panic_range: "&cEl objetivo está demasiado lejos. Pánico solo tiene alcance 1."
+  error_no_cards_to_steal: "&cEl objetivo no tiene cartas para robar."
+  error_no_cards_to_discard: "&cEl objetivo no tiene cartas para descartar."
+  error_jail_self: "&c¡No puedes encarcelarte a ti mismo!"
+  error_jail_sheriff: "&c¡No puedes meter al Sheriff en la cárcel!"
+  error_jail_already: "&c¡%target% ya está en la cárcel!"
+  error_card_not_found: "&c¡Error! No se encontró la carta requerida en tu inventario."
+
+  # Fase de Descarte
+  discard_remaining: "&eAún debes descartar %amount% cartas más."
+  discard_cannot_close: "&c¡Debes descartar %amount% cartas antes de cerrar el inventario!"
+
+# ==========================================
+# MENÚS (GUI) Y ELEMENTOS VISUALES
+# ==========================================
+gui:
+  actions:
+    steal: "Robar"
+    discard: "Descartar"
+  equipment:
+    title: "&8Tu Equipamiento"
+  confirm_end:
+    title: "&8¿Terminar tu turno?"
+    yes: "&aSí, terminar turno"
+    no: "&cNo, seguir jugando"
+  draw_check:
+    title: "&8¡Desenfundar!"
+    button: "&eHacer clic para desenfundar"
+  reaction:
+    title: "&8¡Reacciona!"
+    take_hit: "&cRecibir Daño"
+    play_card: "&aUsar Carta (%card%)"
+    use_barrel: "&9Probar suerte con el Barril"
+  general_store:
+    title: "&8Almacén General"
+  discard:
+    title: "&8Descartar %amount% cartas"
+  target_cards:
+    title: "&8%action% a %target%"
+    hand_cards: "&eMano del jugador (Al Azar)"
+
+displays:
+  health_format: "&7Salud: %hearts%"
+
+items:
+  leave_spectate: "&cAbandonar Partida"
+
+spectator:
+  respawn: "&aHas abandonado el modo espectador."
