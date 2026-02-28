@@ -11,6 +11,9 @@ class GameTurnManager(
     private var activePlayers = listOf<Player>()
     private var currentPlayerIndex = 0
 
+    var hasPlayedBangThisTurn: Boolean = false
+        private set
+
     fun initialize(players: List<Player>) {
         activePlayers = players.toList()
         currentPlayerIndex = (0 until activePlayers.size).random()
@@ -18,6 +21,7 @@ class GameTurnManager(
     }
 
     private fun startTurn(player: Player) {
+        hasPlayedBangThisTurn = false
         arena.updateState(GameState.Playing(player, TurnPhase.Draw))
         processDrawPhase(player)
     }
@@ -27,6 +31,10 @@ class GameTurnManager(
         val card2 = deck.draw()
 
         arena.updateState(GameState.Playing(player, TurnPhase.Action))
+    }
+
+    fun registerBangPlayed() {
+        hasPlayedBangThisTurn = true
     }
 
     fun requestTurnEnd(player: Player): Boolean {

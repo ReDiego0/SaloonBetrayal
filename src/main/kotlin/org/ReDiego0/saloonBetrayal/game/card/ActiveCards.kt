@@ -15,12 +15,18 @@ data object BangCard : ActiveCard {
             player.sendMessage("§cDebes hacer clic derecho sobre un jugador para usar ¡BANG!.")
             return false
         }
+
+        if (arena.turnManager.hasPlayedBangThisTurn && !arena.canPlayMultipleBangs(player)) {
+            player.sendMessage("§cSolo puedes jugar una carta ¡BANG! por turno.")
+            return false
+        }
+
         if (!arena.canSee(player, target)) {
             player.sendMessage("§c¡El objetivo está fuera de tu alcance!")
             return false
         }
 
-        // TODO: Comprobar límite de 1 BANG por turno (a menos que tenga Volcanic)
+        arena.turnManager.registerBangPlayed()
 
         player.sendMessage("§eHas disparado a ${target.name}! Esperando su reacción...")
         target.sendMessage("§c¡${player.name} te ha disparado!")

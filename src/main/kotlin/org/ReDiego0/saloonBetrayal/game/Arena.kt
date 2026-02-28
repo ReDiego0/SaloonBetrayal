@@ -244,6 +244,13 @@ class Arena(
         return getDistance(viewer, target) <= getWeaponRange(viewer)
     }
 
+    fun canPlayMultipleBangs(player: Player): Boolean {
+        if (playerCharacters[player] == PlayerCharacter.WillyTheKid) return true
+
+        val equipment = playerEquipment[player] ?: emptyList()
+        return equipment.any { it.baseCard.id == "volcanic" }
+    }
+
     private fun checkWinConditions() {
         val sheriffAlive = players.any { playerRoles[it] == Role.Sheriff }
 
